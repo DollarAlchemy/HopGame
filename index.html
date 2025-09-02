@@ -1,0 +1,288 @@
+<!-- HopGame — multi-file structure for GitHub Pages
+This canvas bundles all files. Create them with these paths.
+-->
+
+/README.md
+# HopGame
+A tiny mobile-first emoji shooter with jump + attack, character select, audio consent, pause/settings, and combo multiplier.
+
+- Open `index.html` (character select + audio) → goes to `game.html`.
+- Pure ES Modules, no build step. Deploy by enabling GitHub Pages.
+
+/File Tree
+HopGame/
+├── index.html
+├── game.html
+├── css/
+│   └── style.css
+├── js/
+│   ├── boot.js
+│   ├── game.js
+│   ├── audio.js
+│   ├── characters.js
+│   └── util.js
+└── assets/
+    └── favicon.svg (optional)
+
+
+/index.html
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+  <title>HopGame — Select</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="app" class="grid-portrait">
+    <div class="hud">
+      <div class="pill">HopGame</div>
+      <div class="pill">v1</div>
+    </div>
+    <div id="wrap">
+      <div class="overlay show">
+        <div class="panel">
+          <h2>Pick Your Hero</h2>
+          <div class="grid4 mt" id="charGrid"></div>
+          <div class="row mt">
+            <button id="btnAudioOn" class="btn btn-alt" style="max-width:160px">Enable Sound</button>
+            <button id="btnAudioOff" class="btn btn-pause" style="max-width:160px">Mute</button>
+          </div>
+          <div class="muted mt">Tap the playfield (in game) to jump.</div>
+          <div class="center mt"><a class="btnlink" href="#" id="btnStart">Start Game</a></div>
+        </div>
+      </div>
+    </div>
+    <div class="controls">
+      <div class="muted center" style="width:100%">Made with emojis 💫 — works offline if you add a SW later.</div>
+    </div>
+  </div>
+  <script type="module" src="js/boot.js"></script>
+</body>
+</html>
+
+
+/game.html
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+  <title>HopGame — Play</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="app" class="grid-portrait">
+    <div class="hud">
+      <div class="pill big" id="hudScore">0</div>
+      <div class="pill" id="hudMultiplier">x1.00</div>
+      <div class="pill" id="hudTime">00:00</div>
+    </div>
+
+    <div id="wrap">
+      <canvas id="game"></canvas>
+
+      <div id="pause" class="overlay">
+        <div class="panel">
+          <h2>Pause Menu</h2>
+          <div class="row">
+            <label class="pill">Audio: <span id="audioState">Off</span></label>
+            <button id="toggleAudio" class="btn btn-alt" style="max-width:140px">Toggle</button>
+          </div>
+          <div class="mt">Volume</div>
+          <input id="volume" type="range" min="0" max="1" step="0.01" />
+          <div class="row mt">
+            <button id="resume" class="btn btn-attack">Resume</button>
+            <a class="btn btn-pause center" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center" href="index.html">Quit</a>
+          </div>
+        </div>
+      </div>
+
+      <div id="over" class="overlay">
+        <div class="panel center">
+          <h2>Game Over</h2>
+          <div class="mt">Score: <span id="finalScore">0</span></div>
+          <div class="mt">Best: <span id="bestScore">0</span></div>
+          <div class="row mt" style="justify-content:center;">
+            <button id="again" class="btn btn-attack" style="max-width:160px">Play Again</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="controls">
+      <button id="alt" class="btn btn-alt">ALT</button>
+      <button id="pauseBtn" class="btn btn-pause">II</button>
+      <button id="attack" class="btn btn-attack">ATTACK</button>
+    </div>
+  </div>
+
+  <script type="module" src="js/game.js"></script>
+</body>
+</html>
+
+
+/css/style.css
+:root { --pad: 12px; --hudH: 56px; --ctrlH: 96px; --accent:#9146ff; }
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Emoji; background:#101114; color:#eee; }
+.grid-portrait { height: 100%; display: grid; grid-template-rows: var(--hudH) 1fr var(--ctrlH); }
+.hud { display:flex; align-items:center; justify-content:space-between; padding: 0 var(--pad); background:#0b0c0f; border-bottom:1px solid #1f2030; }
+.hud .pill { background:#171827; padding:6px 10px; border-radius:999px; min-width:72px; text-align:center; }
+.hud .big { font-weight:700; letter-spacing:0.3px; }
+#wrap { position:relative; overflow:hidden; background: radial-gradient(80% 60% at 50% 20%, #1c1e2a, #0b0c0f); }
+canvas { width: 100%; height: 100%; display:block; touch-action: none; }
+.controls { display:flex; gap: var(--pad); align-items:center; justify-content:center; padding: var(--pad); background:#0b0c0f; border-top:1px solid #1f2030; }
+.btn { flex:1; height: 64px; border:0; border-radius:16px; font-size:18px; font-weight:700; color:#fff; box-shadow: 0 8px 18px rgba(0,0,0,.35); }
+.btn:active { transform: translateY(1px) scale(0.99); }
+.btn-attack { background:#b90e23; }
+.btn-alt    { background:#1c9a3d; }
+.btn-pause  { background:#666; max-width: 92px; }
+.overlay { position:absolute; inset:0; display:none; align-items:center; justify-content:center; backdrop-filter: blur(4px); background: rgba(10, 11, 18, .62); z-index:10; }
+.overlay.show { display:flex; }
+.panel { width:min(520px, 92vw); background:#131426; border:1px solid #27283b; border-radius:20px; padding:20px; box-shadow:0 20px 60px rgba(0,0,0,.45); }
+.panel h2 { margin: 0 0 12px; }
+.grid4 { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+.card { display:flex; gap:10px; align-items:center; justify-content:center; padding:14px; border-radius:16px; border:1px solid #2a2b40; background:#171833; cursor:pointer; }
+.card:hover { outline:2px solid #2f3150; }
+.card .emo { font-size:30px; }
+.muted { opacity:.75; font-size: 13px; }
+.row { display:flex; gap:12px; align-items:center; }
+input[type=range] { width: 100%; }
+.center { text-align:center; }
+.mt { margin-top:12px; }
+.kbd { padding: 2px 6px; border-radius:6px; background:#1b1c2f; border:1px solid #31324a; font-size:12px; }
+a.btnlink { display:inline-block; margin-top:10px; text-decoration:none; color:#fff; background:#4c52ff; padding:10px 12px; border-radius:10px; font-weight:700; }
+
+
+/js/characters.js
+export const CHARACTERS = {
+  ninja:  { name:'Ninja',  hero:'🥷',      attack:'🔪', alt:'🌀', targets:[ ['🐍','✨'], ['🦊','✨'], ['🐗','✨'] ] },
+  wizard: { name:'Wizard', hero:'🧙\u200d♂️', attack:'🔥', alt:'✨', targets:[ ['👾','✨'], ['👹','✨'], ['🧟','✨'] ] },
+  mermaid:{ name:'Mermaid',hero:'🧜\u200d♀️', attack:'🔱', alt:'🌊', targets:[ ['🚤','🫧'], ['🛥️','🫧'], ['⛵','🫧'] ] },
+  nurse:  { name:'Nurse',  hero:'🧑\u200d⚕️', attack:'💉', alt:'💊', targets:[ ['🤮','😀'], ['🤒','😄'], ['🤧','😊'] ] }
+};
+export const DEFAULT_CHAR = 'ninja';
+
+// Multiplier config
+export const MULTI_MODE = 'smooth'; // 'smooth' | 'tiered'
+export const TIERED = [ {s:0,m:1.0}, {s:10,m:1.5}, {s:30,m:1.75}, {s:60,m:1.9}, {s:100,m:1.95}, {s:300,m:2.0} ];
+export function streakMultiplier(streak){
+  if (MULTI_MODE==='smooth'){
+    const cap=2.0, half=60; // why: feels rewarding early, caps ~300
+    const x = 1 - Math.exp(-streak/half);
+    return 1 + (cap-1)*Math.min(1, x * (300/half) / (300/half + 4));
+  } else { let m=1; for(const t of TIERED) if(streak>=t.s) m=t.m; return m; }
+}
+
+
+/js/audio.js
+export class AudioBus{
+  constructor(){ this.enabled=false; this.ctx=null; this.master=null; this.volume=parseFloat(localStorage.getItem('vol')||'0.5'); }
+  init(){ if(this.ctx) return; this.ctx = new (window.AudioContext||window.webkitAudioContext)(); this.master=this.ctx.createGain(); this.master.gain.value=this.enabled?this.volume:0; this.master.connect(this.ctx.destination); }
+  setEnabled(v){ this.enabled=v; this.init(); this.master.gain.value=v?this.volume:0; }
+  setVolume(v){ this.volume=v; localStorage.setItem('vol',String(v)); if(this.enabled) this.master.gain.value=v; }
+  tone(type='square', f=440, t=0.08, gain=0.12){ if(!this.enabled) return; const o=this.ctx.createOscillator(); const g=this.ctx.createGain(); o.type=type; o.frequency.value=f; g.gain.setValueAtTime(gain, this.ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime+t); o.connect(g).connect(this.master); o.start(); o.stop(this.ctx.currentTime+t); }
+  shoot(){ this.tone('square',720,0.06,0.11);} hit(){ this.tone('triangle',420,0.08,0.12);} whiff(){ this.tone('sine',180,0.12,0.06);} special(){ this.tone('sawtooth',300,0.2,0.18);} 
+}
+
+
+/js/util.js
+export const $ = (s)=> document.querySelector(s);
+export const clamp = (v,min,max)=> Math.max(min, Math.min(max, v));
+export const nowSec = ()=> performance.now()/1000;
+export const fmtTime = (s)=>{ const m=Math.floor(s/60), ss=Math.floor(s%60); return `${String(m).padStart(2,'0')}:${String(ss).padStart(2,'0')}`; };
+
+
+/js/boot.js
+import { CHARACTERS, DEFAULT_CHAR } from './characters.js';
+import { $ } from './util.js';
+
+const grid = $('#charGrid');
+let selected = sessionStorage.getItem('hop.char') || DEFAULT_CHAR;
+
+Object.entries(CHARACTERS).forEach(([key,c])=>{
+  const el=document.createElement('div'); el.className='card'; el.dataset.key=key;
+  el.innerHTML=`<div class="emo">${c.hero}</div><div><div>${c.name}</div><div class="muted">${c.attack} / ${c.alt}</div></div>`;
+  el.addEventListener('click', ()=>{ selected=key; highlight(el); });
+  grid.appendChild(el);
+});
+
+function highlight(el){ [...grid.children].forEach(x=>x.style.outline='none'); el.style.outline='2px solid #4c52ff'; }
+const pre = [...grid.children].find(n=>n.dataset.key===selected) || grid.children[0]; if(pre) highlight(pre);
+
+let audio = sessionStorage.getItem('hop.audio')==='1';
+$('#btnAudioOn').addEventListener('click', ()=>{ audio=true; });
+$('#btnAudioOff').addEventListener('click', ()=>{ audio=false; });
+$('#btnStart').addEventListener('click', (e)=>{ e.preventDefault(); sessionStorage.setItem('hop.char', selected); sessionStorage.setItem('hop.audio', audio?'1':'0'); window.location.href='game.html'; });
+
+
+/js/game.js
+import { CHARACTERS, streakMultiplier } from './characters.js';
+import { AudioBus } from './audio.js';
+import { $, clamp, fmtTime, nowSec } from './util.js';
+
+// Sizing
+const canvas = document.getElementById('game'); const ctx = canvas.getContext('2d');
+let W=0,H=0,DPR=1; function resize(){ DPR=Math.min(2, window.devicePixelRatio||1); W=canvas.clientWidth*DPR; H=canvas.clientHeight*DPR; canvas.width=W; canvas.height=H; }
+window.addEventListener('resize', resize);
+
+// HUD
+const hudScore=$('#hudScore'), hudMul=$('#hudMultiplier'), hudTime=$('#hudTime');
+
+// Audio
+const SFX = new AudioBus(); const wantAudio = sessionStorage.getItem('hop.audio')==='1'; SFX.setEnabled(wantAudio); SFX.init();
+$('#toggleAudio').addEventListener('click', ()=>{ SFX.setEnabled(!SFX.enabled); updateAudioUI(); });
+$('#volume').addEventListener('input', (e)=> SFX.setVolume(parseFloat(e.target.value)) );
+function updateAudioUI(){ $('#audioState').textContent=SFX.enabled?'On':'Off'; $('#volume').value = SFX.volume; }
+updateAudioUI();
+
+// Character
+const key = sessionStorage.getItem('hop.char') || 'ninja';
+const HERO = CHARACTERS[key] || CHARACTERS.ninja;
+
+// Game params
+const GAME = { gravity:1500, jumpV:-520, floorPad:24, projSpeed:820, altCooldown:2.2, atkCooldown:.22, targetRate:0.9, targetSpeed:[110,240], hitRadius:32 };
+
+// State
+const State = { running:false, startTime:0, elapsed:0, score:0, streak:0, best: parseInt(localStorage.getItem('best')||'0',10), cooldownA:0, cooldownB:0, spawnT:0, targets:[], projectiles:[], effects:[] };
+
+class Player{ constructor(){ this.x=0; this.y=0; this.vy=0; this.r=36; } reset(){ this.x=W/2; this.y=H - GAME.floorPad*DPR - this.r - 4; this.vy=0; } jump(){ if(this.onGround()) this.vy = Math.abs(GAME.jumpV)*-DPR; } onGround(){ return this.y >= H - GAME.floorPad*DPR - this.r - 5; } step(dt){ this.vy += GAME.gravity*DPR*dt; this.y += this.vy*dt; if(this.onGround()){ this.y = H - GAME.floorPad*DPR - this.r - 4; this.vy=0; } } draw(){ drawEmoji(HERO.hero,this.x,this.y,36*DPR); } }
+class Projectile{ constructor(x,y,emo,spd){ this.x=x; this.y=y; this.vy=-spd; this.emo=emo; this.dead=false; this.r=18*DPR; } step(dt){ this.y += this.vy*dt; if(this.y<-40*DPR) this.dead=true; } draw(){ drawEmoji(this.emo,this.x,this.y,24*DPR); } }
+class Target{ constructor(emoFrom,emoTo){ this.x=(Math.random()*(W-80*DPR)+40*DPR); this.y=-40*DPR; this.vy=(Math.random()*(GAME.targetSpeed[1]-GAME.targetSpeed[0])+GAME.targetSpeed[0])*DPR; this.from=emoFrom; this.to=emoTo; this.dead=false; this.hit=false; this.r=24*DPR; } step(dt){ this.y+=this.vy*dt; if(this.y>H+40*DPR){ this.dead=true; onMiss(); } } draw(){ drawEmoji(this.hit?this.to:this.from,this.x,this.y,(this.hit?20:28)*DPR); } }
+class Effect{ constructor(emo,x,y){ this.emo=emo; this.x=x; this.y=y; this.t=0; } step(dt){ this.t+=dt; } draw(){ const s=1 - this.t/0.5; if(s<=0) return; ctx.globalAlpha=clamp(s,0,1); drawEmoji(this.emo,this.x,this.y-20*DPR*this.t,20*DPR*s); ctx.globalAlpha=1; } }
+
+const player = new Player();
+
+function drawEmoji(txt,x,y,size){ ctx.save(); ctx.font=`${size}px serif`; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(txt,x,y); ctx.restore(); }
+
+function fire(){ if(State.cooldownA>0) return; State.projectiles.push(new Projectile(player.x, player.y-30*DPR, HERO.attack, GAME.projSpeed*DPR)); State.cooldownA = GAME.atkCooldown; SFX.shoot(); }
+function fireAlt(){ if(State.cooldownB>0) return; State.cooldownB=GAME.altCooldown; SFX.special(); const burst=7; const ang0=-Math.PI/2; const speed=GAME.projSpeed*0.75*DPR; for(let i=0;i<burst;i++){ const ang=ang0 + (i-(burst-1)/2)*(Math.PI/10); const p=new Projectile(player.x, player.y-30*DPR, HERO.alt, speed); p.vx=Math.cos(ang)*speed*0.25; p.vy=Math.sin(ang)*speed; p.step=function(dt){ this.x+=(this.vx||0)*dt; this.y+=this.vy*dt; if(this.y<-50*DPR||this.x<-50*DPR||this.x>W+50*DPR) this.dead=true; }; State.projectiles.push(p);} }
+
+function randomTarget(){ const arr=HERO.targets; return arr[(Math.random()*arr.length)|0]; }
+function spawnTargets(dt){ State.spawnT -= dt; if(State.spawnT<=0){ const t=randomTarget(); State.targets.push(new Target(t[0], t[1])); State.spawnT=Math.max(0.25, GAME.targetRate*(0.5+Math.random())); } }
+function onHit(t){ if(t.hit) return; t.hit=true; State.effects.push(new Effect('✨', t.x, t.y)); State.score += Math.round(10 * streakMultiplier(State.streak)); State.streak++; SFX.hit(); }
+function onMiss(){ if(State.streak>0) SFX.whiff(); State.streak=0; }
+
+let lastT=0; function loop(t){ if(!State.running) return; requestAnimationFrame(loop); const ts=t/1000; const dt=clamp(ts-lastT,0,1/30); lastT=ts; State.elapsed = ts - State.startTime; State.cooldownA=Math.max(0, State.cooldownA-dt); State.cooldownB=Math.max(0, State.cooldownB-dt); player.step(dt); spawnTargets(dt); for(const p of State.projectiles) p.step(dt); for(const g of State.targets) g.step(dt); for(const e of State.effects) e.step(dt); for(const g of State.targets){ if(g.dead) continue; for(const p of State.projectiles){ if(p.dead) continue; const dx=g.x-p.x, dy=g.y-p.y; if(dx*dx+dy*dy < (GAME.hitRadius*DPR)**2){ p.dead=true; onHit(g); } } } State.projectiles = State.projectiles.filter(o=>!o.dead); State.targets = State.targets.filter(o=>!o.dead); State.effects = State.effects.filter(o=>o.t<0.55); ctx.clearRect(0,0,W,H); drawEmoji('⬇️', W/2, 42*DPR, 24*DPR); for(const g of State.targets) g.draw(); for(const p of State.projectiles) p.draw(); player.draw(); ctx.fillStyle='#24263c'; ctx.fillRect(0, H-GAME.floorPad*DPR, W, 2*DPR); hudScore.textContent=State.score; hudMul.textContent='x'+streakMultiplier(State.streak).toFixed(2); hudTime.textContent=fmtTime(State.elapsed); if(State.elapsed>120) return endGame(); }
+
+function start(){ resize(); player.reset(); State.running=true; State.startTime=nowSec(); State.elapsed=0; lastT=performance.now()/1000; State.score=0; State.streak=0; State.targets.length=0; State.projectiles.length=0; State.effects.length=0; requestAnimationFrame(loop); }
+function pauseGame(flag){ State.running=!flag; (flag? show('#pause'):hide('#pause')); }
+function endGame(){ State.running=false; show('#over'); $('#finalScore').textContent=State.score; const best = Math.max(parseInt(localStorage.getItem('best')||'0',10), State.score); localStorage.setItem('best', String(best)); $('#bestScore').textContent=best; }
+
+function show(s){ $(s).classList.add('show'); } function hide(s){ $(s).classList.remove('show'); }
+
+// Buttons
+$('#attack').addEventListener('touchstart', (e)=>{ e.preventDefault(); fire(); });
+$('#alt').addEventListener('touchstart', (e)=>{ e.preventDefault(); fireAlt(); });
+$('#pauseBtn').addEventListener('touchstart', (e)=>{ e.preventDefault(); pauseGame(true); });
+$('#attack').addEventListener('click', fire); $('#alt').addEventListener('click', fireAlt); $('#pauseBtn').addEventListener('click', ()=>pauseGame(true));
+canvas.addEventListener('touchstart', (e)=>{ e.preventDefault(); if(State.running) player.jump(); });
+canvas.addEventListener('mousedown', ()=>{ if(State.running) player.jump(); });
+window.addEventListener('keydown', (e)=>{ if(!State.running) return; if(e.code==='Space') player.jump(); if(e.code==='KeyJ') fire(); if(e.code==='KeyK') fireAlt(); if(e.code==='Escape') pauseGame(true); });
+$('#resume').addEventListener('click', ()=>{ hide('#pause'); State.running=true; requestAnimationFrame(loop); });
+$('#again').addEventListener('click', ()=>{ hide('#over'); start(); });
+
+start();
